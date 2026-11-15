@@ -1,6 +1,7 @@
 # Disable Sidebar Icons
 
 Keep your RuneLite sidebar tidy. Hide icons you rarely use and drag the rest into your preferred order—all while keeping the plugins running.
+<img width="341" height="542" alt="image" src="https://github.com/user-attachments/assets/28a26131-b649-4114-878a-d490c1263a20" />
 
 ## How to use
 
@@ -26,4 +27,5 @@ RuneLite's Configuration icon stays available so you can always reach these sett
 - New icons appear automatically; **Refresh** checks immediately.
 - Hiding an icon keeps its plugin running. If its panel is open, hiding the icon closes that panel.
 - Disabling this plugin restores RuneLite's normal sidebar layout.
-<img width="309" height="1363" alt="image" src="https://github.com/user-attachments/assets/d6db0784-bbec-428e-b282-7d3daa5510be" />
+
+
