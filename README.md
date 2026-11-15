@@ -1,6 +1,7 @@
 # Sidebar Organizer
 
 Keep your RuneLite sidebar tidy. Hide icons you rarely use and drag the rest into your preferred order—all while keeping the plugins running.
+
 <img width="341" height="542" alt="image" src="https://github.com/user-attachments/assets/28a26131-b649-4114-878a-d490c1263a20" />
 
 ## How to use
