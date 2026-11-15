@@ -111,6 +111,129 @@ public class ToolbarAccessTest
     }
 
     @Test
+    public void hidingMiddleIconsKeepsWrappedColumnsCompactAndHitTargetsValid() throws Exception
+    {
+        onEdt(() -> {
+            // RuneLiteLAF.properties defaults: evenlyWrapTabs=true, expandWrappedTabs=false.
+            // Exercise those defaults rather than forcing a friendlier tab layout in this fixture.
+            for (int height : new int[] {120, 180, 300, 600})
+            {
+                for (boolean reverse : new boolean[] {false, true})
+                {
+                    for (int selected : new int[] {-1, 0, 28, 57})
+                    {
+                        Fixture fixture = new Fixture();
+                        fixture.tabs.setSize(300, height);
+                        for (int index = 0; index < 58; index++) { fixture.add("Icon " + index); }
+                        fixture.access.attach(fixture.manager);
+                        List<SidebarTogglePlugin.Entry> entries = fixture.access.snapshot(fixture.manager);
+                        if (reverse) { java.util.Collections.reverse(entries); }
+                        if (selected >= 0) { fixture.tabs.setSelectedComponent(entries.get(selected).component); }
+                        fixture.tabs.doLayout();
+                        Set<String> hidden = new HashSet<>();
+                        for (int index = 12; index < 46; index++) { hidden.add(entries.get(index).key()); }
+                        fixture.access.apply(entries, hidden, reverse);
+                        fixture.tabs.setSize(fixture.tabs.getPreferredSize().width, height);
+                        fixture.tabs.doLayout();
+
+                        java.awt.Insets insets = fixture.tabs.getInsets();
+                        Rectangle paneArea = new Rectangle(insets.left, insets.top,
+                            fixture.tabs.getWidth() - insets.left - insets.right,
+                            fixture.tabs.getHeight() - insets.top - insets.bottom);
+                        int visibleCount = 0;
+                        java.util.Map<Integer, java.util.List<Rectangle>> columns = new java.util.TreeMap<>();
+                        for (int index = 0; index < fixture.tabs.getTabCount(); index++)
+                        {
+                            Rectangle bounds = fixture.tabs.getBoundsAt(index);
+                            SidebarTogglePlugin.Entry matching = null;
+                            for (SidebarTogglePlugin.Entry entry : entries)
+                            {
+                                if (entry.component == fixture.tabs.getComponentAt(index)) { matching = entry; break; }
+                            }
+                            if (matching != null && hidden.contains(matching.key()))
+                            {
+                                assertEquals("hidden tab height", 0, bounds.height);
+                                continue;
+                            }
+                            visibleCount++;
+                            columns.computeIfAbsent(bounds.x, unused -> new java.util.ArrayList<>()).add(new Rectangle(bounds));
+                            assertTrue("visible tab has positive bounds: " + bounds, bounds.width > 0 && bounds.height > 0);
+                            assertTrue("visible tab stays inside pane: " + bounds + " area=" + paneArea, paneArea.contains(bounds));
+                            assertEquals("hit target resolves to its native index", index,
+                                fixture.tabs.indexAtLocation(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2));
+                            for (int other = index + 1; other < fixture.tabs.getTabCount(); other++)
+                            {
+                                Rectangle otherBounds = fixture.tabs.getBoundsAt(other);
+                                if (otherBounds.width > 0 && otherBounds.height > 0)
+                                {
+                                    assertFalse("visible tabs overlap: " + bounds + " / " + otherBounds,
+                                        bounds.intersects(otherBounds));
+                                }
+                            }
+                        }
+                        assertEquals(25, visibleCount);
+                        assertTrue("remaining tabs should occupy wrapped columns", fixture.tabs.getTabRunCount() > 1);
+                        int lastColumn = columns.keySet().stream().mapToInt(Integer::intValue).max().getAsInt();
+                        for (java.util.Map.Entry<Integer, java.util.List<Rectangle>> column : columns.entrySet())
+                        {
+                            java.util.List<Rectangle> cells = column.getValue();
+                            cells.sort(java.util.Comparator.comparingInt(cell -> cell.y));
+                            for (int row = 1; row < cells.size(); row++)
+                            {
+                                assertEquals("no gaps inside a column", cells.get(row - 1).y + cells.get(row - 1).height, cells.get(row).y);
+                            }
+                            Rectangle last = cells.get(cells.size() - 1);
+                            if (column.getKey() != lastColumn)
+                            {
+                                assertTrue("earlier columns fill before wrapping", last.y + 2 * last.height > paneArea.y + paneArea.height);
+                            }
+                        }
+                        fixture.access.close();
+                    }
+                }
+            }
+        });
+    }
+
+    @Test
+    public void reorderedSingleColumnDoesNotLetTrailingToolbarCoverIcons() throws Exception
+    {
+        onEdt(() -> {
+            Fixture fixture = new Fixture();
+            fixture.tabs.setSize(300, 600);
+            for (int index = 0; index < 18; index++) { fixture.add("Icon " + index); }
+            JPanel toolbar = new JPanel(new DynamicGridLayout(0, 1, 0, 4));
+            addButton(toolbar, "Action"); addButton(toolbar, "Close sidebar");
+            JPanel trailing = new JPanel(new java.awt.BorderLayout());
+            trailing.add(toolbar, java.awt.BorderLayout.SOUTH);
+            fixture.tabs.putClientProperty(com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, trailing);
+            ToolbarAccess access = new ToolbarAccess(component -> component == toolbar);
+            access.attach(fixture.manager);
+            List<SidebarTogglePlugin.Entry> entries = access.snapshot(fixture.manager);
+            Set<String> hidden = new HashSet<>();
+            for (int index = 4; index < 13; index++) { hidden.add(entries.get(index).key()); }
+            java.util.Collections.reverse(entries.subList(0, 18));
+            access.apply(entries, hidden, true);
+            fixture.tabs.setSize(fixture.tabs.getPreferredSize().width, 600);
+            fixture.tabs.doLayout();
+            assertEquals(1, fixture.tabs.getTabRunCount());
+            java.awt.Container host = trailing.getParent();
+            Rectangle trailerBounds = SwingUtilities.convertRectangle(host.getParent(), host.getBounds(), fixture.tabs);
+            assertTrue(trailerBounds.height >= toolbar.getPreferredSize().height);
+            for (int index = 0; index < fixture.tabs.getTabCount(); index++)
+            {
+                Rectangle bounds = fixture.tabs.getBoundsAt(index);
+                if (bounds.height > 0)
+                {
+                    assertFalse("toolbar allocation covers reordered icons: " + trailerBounds + " / " + bounds,
+                        trailerBounds.intersects(bounds));
+                }
+            }
+            access.close();
+        });
+    }
+
+    @Test
     public void restoresInitiallyDisabledTabsAndDoesNotReplaceAnotherPluginsUi() throws Exception
     {
         onEdt(() -> {

@@ -1,6 +1,7 @@
 package com.sidebartoggle;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.LayoutManager;
@@ -34,10 +35,37 @@ final class HiddenTabsUI extends RuneLiteTabbedPaneUI
         if (tabPane.getTabLayoutPolicy() != JTabbedPane.WRAP_TAB_LAYOUT) { return super.createLayoutManager(); }
         return new RuneLiteTabbedPaneLayout()
         {
+            private boolean nativeLayout;
+
+            @Override
+            protected void normalizeTabRuns(int placement, int count, int start, int limit)
+            {
+                // RuneLite balances columns by registered tab count. Hidden zero-height tabs
+                // would still count, leaving sparse columns and overfilling later columns.
+                // Keep Swing's capacity-based wrap boundaries whenever icons are hidden.
+                if (hidden.isEmpty()) { super.normalizeTabRuns(placement, count, start, limit); }
+            }
+
             @Override
             public void calculateLayoutInfo()
             {
                 super.calculateLayoutInfo();
+                if (!nativeLayout) { applyVisualOrder(); }
+            }
+
+            @Override
+            public void layoutContainer(Container parent)
+            {
+                // FlatLaf measures leading/trailing components from native first/last tab
+                // bounds. Reordering before that measurement can put the toolbar over icons.
+                nativeLayout = true;
+                try { super.layoutContainer(parent); }
+                finally { nativeLayout = false; }
+                applyVisualOrder();
+            }
+
+            private void applyVisualOrder()
+            {
                 List<Integer> nativeIndices = visibleIndices();
                 List<Integer> visualIndices = visualIndices(nativeIndices);
                 List<Rectangle> slots = new ArrayList<>();
