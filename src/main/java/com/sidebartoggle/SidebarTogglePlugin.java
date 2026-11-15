@@ -26,7 +26,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 
-@PluginDescriptor(name = "Disable Sidebar Icons", description = "Hide and reorder plugin sidebar icons while keeping their plugins running", tags = {"sidebar", "icons", "hide", "reorder", "organize"})
+@PluginDescriptor(name = "Sidebar Organizer", description = "Hide and reorder plugin sidebar icons while keeping their plugins running", tags = {"sidebar", "icons", "hide", "reorder", "organize"})
 public class SidebarTogglePlugin extends Plugin
 {
     static final String GROUP = "disablesidebaricons";
@@ -60,7 +60,7 @@ public class SidebarTogglePlugin extends Plugin
         onEdt(() -> {
             running = true;
             panel = new SidebarTogglePanel(this::setHidden, this::showAll, this::scan, this::moveIcon, this::resetOrder);
-            navigation = NavigationButton.builder().tooltip("Sidebar Icons").icon(icon()).priority(20).panel(panel).build();
+            navigation = NavigationButton.builder().tooltip("Sidebar Organizer").icon(icon()).priority(20).panel(panel).build();
             access = new ToolbarAccess();
             // Attach once to locate the enclosing sidebar even when the saved preference hides us.
             toolbar.addNavigation(navigation);

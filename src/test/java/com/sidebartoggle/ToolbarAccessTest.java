@@ -308,7 +308,7 @@ public class ToolbarAccessTest
             tabs.putClientProperty("FlatLaf.style", "tabInsets: 2,5,2,5; variableSize: true; deselectable: true; tabHeight: 26");
             tabs.setUI(new RuneLiteTabbedPaneUI());
             tabs.setSize(300, 150);
-            addTab("Sidebar Icons", manager);
+            addTab("Sidebar Organizer", manager);
             tabs.setSelectedIndex(-1);
         }
         Component add(String tooltip)

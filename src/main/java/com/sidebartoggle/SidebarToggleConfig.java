@@ -10,7 +10,7 @@ public interface SidebarToggleConfig extends Config
     @ConfigItem(
         keyName = "hideOwnSidebar",
         name = "Hide own sidebar icon",
-        description = "Hide the Sidebar Icons management icon. Turn this off here to restore it.",
+        description = "Hide the Sidebar Organizer icon. Turn this off here to restore it.",
         position = 0
     )
     default boolean hideOwnSidebar()

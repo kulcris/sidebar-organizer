@@ -26,7 +26,7 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.register('run', JavaExec) {
     group = 'application'
-    description = 'Launch RuneLite with Disable Sidebar Icons loaded'
+    description = 'Launch RuneLite with Sidebar Organizer loaded'
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'com.sidebartoggle.SidebarToggleLauncher'
     jvmArgs '-ea'

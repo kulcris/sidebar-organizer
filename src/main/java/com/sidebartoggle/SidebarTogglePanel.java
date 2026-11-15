@@ -56,7 +56,7 @@ final class SidebarTogglePanel extends PluginPanel
         setLayout(new BorderLayout(0, 12));
         setBorder(BorderFactory.createEmptyBorder(12, 10, 12, 10));
         JPanel header = new JPanel(new GridBagLayout());
-        JLabel title = new JLabel("Sidebar Icons");
+        JLabel title = new JLabel("Sidebar Organizer");
         title.setForeground(ColorScheme.BRAND_ORANGE);
         title.setFont(title.getFont().deriveFont(Font.BOLD, 14f));
         addHeader(header, title, 8);
