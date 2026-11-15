@@ -1,9 +1,9 @@
 .gradle/
 build/
 out/
-.idea/*
-!.idea/compiler.xml
-!.idea/encodings.xml
-!.idea/gradle.xml
-!.idea/misc.xml
+.idea/
+.run/
+AGENTS.md
+docs/RUNELITE_REQUIREMENTS.md
+run-test-client.bat
 *.iml
