@@ -27,4 +27,3 @@ RuneLite's Configuration icon stays available so you can always reach these sett
 - Hiding an icon keeps its plugin running. If its panel is open, hiding the icon closes that panel.
 - Disabling this plugin restores RuneLite's normal sidebar layout.
 
-This plugin is not yet available through the RuneLite Plugin Hub.
